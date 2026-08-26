@@ -116,10 +116,19 @@ class MainActivity : AppCompatActivity() {
             binding.btnPlayPause.text = if (isPlaying) getString(R.string.pause) else getString(R.string.play)
         }
         override fun onPlayerError(error: PlaybackException) {
-            Log.e("ChimataPlayer", "Playback error: ${error.errorCodeName} - ${error.message}", error)
+            // error.message is often just the generic category ("Source error"). The real
+            // reason (HTTP code, timeout, blocked request, etc.) is usually in the cause chain.
+            var cause: Throwable? = error.cause
+            val causeChain = StringBuilder()
+            while (cause != null) {
+                causeChain.append(cause.javaClass.simpleName).append(": ").append(cause.message).append(" | ")
+                cause = cause.cause
+            }
+            val detail = causeChain.toString().ifBlank { error.message ?: "unknown" }
+            Log.e("ChimataPlayer", "Playback error [${error.errorCodeName}]: $detail", error)
             Toast.makeText(
                 this@MainActivity,
-                "Couldn't play this song: ${error.message}",
+                "Couldn't play: $detail",
                 Toast.LENGTH_LONG
             ).show()
         }
