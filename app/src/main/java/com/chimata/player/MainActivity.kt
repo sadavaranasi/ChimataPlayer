@@ -6,7 +6,9 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.widget.Toast
+import androidx.media3.common.PlaybackException
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaMetadata
@@ -112,6 +114,14 @@ class MainActivity : AppCompatActivity() {
         }
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             binding.btnPlayPause.text = if (isPlaying) getString(R.string.pause) else getString(R.string.play)
+        }
+        override fun onPlayerError(error: PlaybackException) {
+            Log.e("ChimataPlayer", "Playback error: ${error.errorCodeName} - ${error.message}", error)
+            Toast.makeText(
+                this@MainActivity,
+                "Couldn't play this song: ${error.message}",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
