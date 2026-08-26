@@ -24,10 +24,11 @@ class PlaybackService : MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
 
-        okHttpClient = OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .build()
+        okHttpClient = LenientSsl.applyTo(
+            OkHttpClient.Builder()
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+        ).build()
 
         val dataSourceFactory = ChimataDataSource.Factory(okHttpClient)
         val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
