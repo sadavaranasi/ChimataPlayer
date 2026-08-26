@@ -24,6 +24,9 @@ class SongListAdapter(
         notifyDataSetChanged()
     }
 
+    /** The exact list currently visible after search filtering, in display order. */
+    fun currentSongs(): List<Song> = shown
+
     inner class VH(val binding: ItemSongBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
