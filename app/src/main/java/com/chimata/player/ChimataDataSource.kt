@@ -33,20 +33,28 @@ class ChimataDataSource(
 
         const val SCHEME = "chimata"
         const val BASE = "https://chimatamusic.us"
-        const val REFERER = "$BASE/telugu_songs/Telugu-Movie-Songs-BigIndex.php"
+        const val REFERER = "$BASE/telugu_songs/play-Telugu-Songs-iphone.php"
         const val RESOLVE_ENDPOINT = "$BASE/telugu_songs/playeriphone.php"
 
-        // Mimic a real mobile browser. Many sites (this one included, based on how its player
-        // is built) silently reject or misbehave on requests that don't look like they came
-        // from an actual browser tab - no User-Agent/Referer is a dead giveaway of a bot/script.
+        // The endpoint is named "playeriphone.php" and is only ever called via XMLHttpRequest
+        // from inside the iPhone-styled play page in the site's own JS. Mimicking an iPhone
+        // Safari UA + marking the request as AJAX (X-Requested-With) matches that real call
+        // shape much more closely than a generic desktop/Android UA does.
         private const val USER_AGENT =
-            "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) " +
-                "Chrome/120.0.0.0 Mobile Safari/537.36"
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 " +
+                "(KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
 
         /** Shared headers used for both the plist lookup call and the actual audio file fetch. */
         val browserHeaders: Map<String, String> = mapOf(
             "User-Agent" to USER_AGENT,
-            "Referer" to REFERER
+            "Referer" to REFERER,
+            "Accept" to "*/*",
+            "Accept-Language" to "en-US,en;q=0.9"
+        )
+
+        /** Extra header sent only on the AJAX lookup call, matching the site's own JS exactly. */
+        private val ajaxHeaders: Map<String, String> = browserHeaders + mapOf(
+            "X-Requested-With" to "XMLHttpRequest"
         )
 
         fun uriForSong(id: Int): Uri = Uri.parse("$SCHEME://plist/$id")
@@ -60,7 +68,7 @@ class ChimataDataSource(
             resolvedCache[id]?.let { return Pair(readableTitleCache[id] ?: "", it) }
 
             val requestBuilder = Request.Builder().url("$RESOLVE_ENDPOINT?plist=$id")
-            browserHeaders.forEach { (k, v) -> requestBuilder.header(k, v) }
+            ajaxHeaders.forEach { (k, v) -> requestBuilder.header(k, v) }
 
             client.newCall(requestBuilder.build()).execute().use { response ->
                 if (!response.isSuccessful) {
