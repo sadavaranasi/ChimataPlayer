@@ -53,6 +53,12 @@ debugging on the phone, plug it in via USB, and hit the green ▶ Run button ins
 4. Drive off — your car stereo's next/previous/play/pause buttons control this app as long as
    it's the last app that was playing audio over the Bluetooth connection.
 
+## Lyricist data
+Parsed from a second view of the site's catalog (`?page=lyricist`), which groups songs by
+lyricist instead of by movie. 7,538 of 7,566 songs matched directly to a lyricist; the rest
+(a handful of unusual title formats, or the site itself leaving that field blank for a group)
+are tagged `"NA"`.
+
 ## Error-handling behavior
 - **Tap a song directly** → that becomes a deliberate, explicit pick. If it fails to play, the
   app stops there and shows the error — it won't guess at something else for you.

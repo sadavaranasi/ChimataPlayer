@@ -22,7 +22,8 @@ class SongListAdapter(
             allSongs.filter {
                 it.title.lowercase().contains(q) ||
                     it.movie.lowercase().contains(q) ||
-                    it.musicDirector.lowercase().contains(q)
+                    it.musicDirector.lowercase().contains(q) ||
+                    it.lyricist.lowercase().contains(q)
             }
         }
         notifyDataSetChanged()
@@ -39,7 +40,7 @@ class SongListAdapter(
         val song = shown[position]
         holder.binding.songTitle.text = song.title
         holder.binding.songMovie.text = song.movie
-        holder.binding.songDirector.text = "Music: ${song.musicDirector}"
+        holder.binding.songDirector.text = "Music: ${song.musicDirector}  |  Lyrics: ${song.lyricist}"
         holder.binding.root.setOnClickListener { onClick(song) }
     }
 
