@@ -6,7 +6,8 @@ import org.json.JSONArray
 data class Song(
     val id: Int,
     val title: String,
-    val movie: String
+    val movie: String,
+    val musicDirector: String
 )
 
 data class Movie(
@@ -34,7 +35,14 @@ object Catalog {
             val songs = ArrayList<Song>(songsArr.length())
             for (j in 0 until songsArr.length()) {
                 val s = songsArr.getJSONObject(j)
-                songs.add(Song(id = s.getInt("id"), title = s.getString("title"), movie = movieName))
+                songs.add(
+                    Song(
+                        id = s.getInt("id"),
+                        title = s.getString("title"),
+                        movie = movieName,
+                        musicDirector = m.optString("musicDirector", "")
+                    )
+                )
             }
             movies.add(
                 Movie(

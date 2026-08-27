@@ -64,6 +64,12 @@ class PlaybackService : MediaSessionService() {
             .setMediaSourceFactory(mediaSourceFactory)
             .build()
 
+        // Keeps the CPU/network alive to finish loading audio even if the screen turns off or
+        // the device would otherwise start dozing - the classic cause of background streams
+        // going silent mid-playback with no error at all. Very relevant for a "phone mounted
+        // in the car, screen off" use case.
+        player.setWakeMode(C.WAKE_MODE_NETWORK)
+
         // Repeat the whole queue so "next" at the end just loops back to the start.
         player.repeatMode = Player.REPEAT_MODE_ALL
 
@@ -77,9 +83,31 @@ class PlaybackService : MediaSessionService() {
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
+                val name = when (playbackState) {
+                    Player.STATE_IDLE -> "IDLE"
+                    Player.STATE_BUFFERING -> "BUFFERING"
+                    Player.STATE_READY -> "READY"
+                    Player.STATE_ENDED -> "ENDED"
+                    else -> "UNKNOWN($playbackState)"
+                }
+                Log.d(TAG, "Playback state -> $name")
                 if (playbackState == Player.STATE_READY) {
                     consecutiveAutoSkips = 0
+                    // The manual flag should only protect a song's very first attempt to start
+                    // (i.e. "this exact tap failed outright, stop"). Once it has actually reached
+                    // READY - meaning the direct pick already succeeded once - any later hiccup
+                    // mid-stream (a stall, a dropped connection, etc.) is treated as an ordinary
+                    // playback error and is allowed to auto-skip onward like everything else.
+                    lastPlayWasManual = false
                 }
+            }
+
+            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                Log.d(TAG, "playWhenReady=$playWhenReady reason=$reason")
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                Log.d(TAG, "isPlaying=$isPlaying")
             }
 
             override fun onPlayerError(error: PlaybackException) {
@@ -109,11 +137,13 @@ class PlaybackService : MediaSessionService() {
             .setSessionActivity(sessionActivityIntent)
             .build()
 
-        // Default queue = full catalog. MainActivity can replace this with a filtered subset
-        // (e.g. search results) via playManualSelection().
+        // Default queue = full catalog, starting on a random song each time the app/service
+        // starts up (instead of always song #1). MainActivity can replace this with a filtered
+        // subset (e.g. search results) via playManualSelection() once the user taps something.
         val songs = Catalog.loadFlatSongs(this)
         songById = songs.associateBy { it.id }
-        player.setMediaItems(songs.map { toMediaItem(it) })
+        val startIndex = if (songs.isNotEmpty()) songs.indices.random() else 0
+        player.setMediaItems(songs.map { toMediaItem(it) }, startIndex, 0L)
         player.prepare()
     }
 
