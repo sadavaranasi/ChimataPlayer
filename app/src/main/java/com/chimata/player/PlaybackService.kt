@@ -3,8 +3,11 @@ package com.chimata.player
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Binder
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
+import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -40,6 +43,7 @@ class PlaybackService : MediaSessionService() {
     private lateinit var mediaSession: MediaSession
     private lateinit var okHttpClient: OkHttpClient
     private var songById: Map<Int, Song> = emptyMap()
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     // True only for the exact playback attempt that resulted directly from the user tapping a
     // song in the list. Any other transition (auto-advance, next/prev, our own auto-skip) clears
@@ -62,6 +66,13 @@ class PlaybackService : MediaSessionService() {
 
         player = ExoPlayer.Builder(this)
             .setMediaSourceFactory(mediaSourceFactory)
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(C.USAGE_MEDIA)
+                    .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                    .build(),
+                /* handleAudioFocus = */ true
+            )
             .build()
 
         // Keeps the CPU/network alive to finish loading audio even if the screen turns off or
@@ -104,6 +115,24 @@ class PlaybackService : MediaSessionService() {
 
             override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
                 Log.d(TAG, "playWhenReady=$playWhenReady reason=$reason")
+                // Some car head units cause a brief Bluetooth handshake blip (reconnect, a nav
+                // prompt, a phone-call tone) that Android sometimes reports to apps as a
+                // *permanent* audio focus loss even though it's momentary. ExoPlayer correctly
+                // refuses to auto-resume after a real permanent loss (e.g. an actual phone call
+                // taking over) - but that also means these spurious blips can silently and
+                // permanently pause music with no error at all. Retrying once, shortly after,
+                // recovers from the false case while a genuine ongoing loss (e.g. a real call
+                // still in progress) will simply fail to resume again and stay paused, which is
+                // still the correct outcome for that case.
+                if (!playWhenReady && reason == Player.PLAY_WHEN_READY_CHANGE_REASON_AUDIO_FOCUS_LOSS) {
+                    Log.w(TAG, "Paused by audio focus loss - will retry resuming once in 2s.")
+                    mainHandler.postDelayed({
+                        if (!player.playWhenReady) {
+                            Log.d(TAG, "Retrying playback after focus-loss pause.")
+                            player.playWhenReady = true
+                        }
+                    }, 2000)
+                }
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -202,6 +231,7 @@ class PlaybackService : MediaSessionService() {
     }
 
     override fun onDestroy() {
+        mainHandler.removeCallbacksAndMessages(null)
         mediaSession.release()
         player.release()
         super.onDestroy()

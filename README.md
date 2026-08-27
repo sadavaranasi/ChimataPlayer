@@ -64,6 +64,32 @@ debugging on the phone, plug it in via USB, and hit the green ▶ Run button ins
   filtered list* the active queue, so any of the auto-skip behavior above stays within your
   search results instead of jumping back out to the full catalog.
 
+## If playback stops when you minimize the app or the screen turns off
+This is a very common Android issue for any sideloaded app that plays audio in the background -
+it's not specific to this app's code. Big streaming apps (YouTube Music, Spotify) are
+pre-approved by phone manufacturers to keep running unrestricted; a personal app you installed
+yourself usually isn't, until you tell your phone to leave it alone.
+
+The app now prompts you once, on first launch, to exclude it from battery optimization - tap
+**Allow** on that system dialog when it appears. If you missed it or dismissed it, you can
+trigger it again, or do it manually:
+
+1. **Settings → Apps → Chimata Player → Battery** → set to **Unrestricted** (wording varies:
+   "Don't optimize", "No restrictions", etc.).
+2. **On Xiaomi (MIUI):** also open **Settings → Apps → Manage apps → Chimata Player → Autostart**
+   and enable it, plus **Battery saver → No restrictions**.
+3. **On Samsung:** **Settings → Apps → Chimata Player → Battery → Unrestricted**, and make sure
+   it's not listed under **Settings → Battery → Background usage limits → Sleeping/Deep sleeping
+   apps**.
+4. **On OnePlus/Oppo/Vivo:** look for **Battery → App battery management** (or **Autostart
+   manager**) and allow background activity for the app.
+5. It also helps to swipe-lock the app's card in the recent-apps view on many of these phones
+   (a small padlock icon appears when you long-press the card), which further signals the OS not
+   to kill it.
+
+None of this is optional bloat - it's the actual mechanism that lets any background audio app
+survive screen-off on most non-Pixel/stock-Android phones.
+
 ## Notes / limitations
 - This app is for **your personal use only** — it streams directly from chimatamusic.us using
   the same lookup mechanism their own mobile player page uses. It does not host, cache, or

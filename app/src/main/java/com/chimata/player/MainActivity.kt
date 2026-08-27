@@ -5,9 +5,12 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.os.PowerManager
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -57,6 +60,7 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= 33) {
             notifPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
+        requestIgnoreBatteryOptimizations()
 
         allSongs = Catalog.loadFlatSongs(this)
 
@@ -149,6 +153,27 @@ class MainActivity : AppCompatActivity() {
     private fun detachPlayerListener() {
         playerListener?.let { service?.player?.removeListener(it) }
         playerListener = null
+    }
+
+    /**
+     * Background music streaming on most phones (especially Xiaomi/Samsung/OnePlus/Oppo-Vivo
+     * skins) gets its network/CPU access killed once the screen turns off or the app is
+     * swiped away, *unless* the phone's battery optimizer has been told to leave this app
+     * alone. Android deliberately requires a manual tap on the system dialog for this - an
+     * app can't silently grant itself this exemption.
+     */
+    private fun requestIgnoreBatteryOptimizations() {
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+            try {
+                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                    data = Uri.parse("package:$packageName")
+                }
+                startActivity(intent)
+            } catch (t: Throwable) {
+                Log.e("ChimataPlayer", "Couldn't launch battery optimization exemption prompt", t)
+            }
+        }
     }
 
     private fun updateNowPlaying() {
