@@ -10,7 +10,9 @@ class SongListAdapter(
     private val onClick: (Song) -> Unit
 ) : RecyclerView.Adapter<SongListAdapter.VH>() {
 
-    private var shown: List<Song> = allSongs
+    /** The list currently displayed (full catalog, or the filtered search results). */
+    var shown: List<Song> = allSongs
+        private set
 
     fun filter(query: String) {
         shown = if (query.isBlank()) {
@@ -23,9 +25,6 @@ class SongListAdapter(
         }
         notifyDataSetChanged()
     }
-
-    /** The exact list currently visible after search filtering, in display order. */
-    fun currentSongs(): List<Song> = shown
 
     inner class VH(val binding: ItemSongBinding) : RecyclerView.ViewHolder(binding.root)
 

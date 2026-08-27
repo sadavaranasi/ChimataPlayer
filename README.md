@@ -53,6 +53,17 @@ debugging on the phone, plug it in via USB, and hit the green ▶ Run button ins
 4. Drive off — your car stereo's next/previous/play/pause buttons control this app as long as
    it's the last app that was playing audio over the Bluetooth connection.
 
+## Error-handling behavior
+- **Tap a song directly** → that becomes a deliberate, explicit pick. If it fails to play, the
+  app stops there and shows the error — it won't guess at something else for you.
+- **Everything else** (a song finishing and auto-advancing, pressing Next/Previous — from the
+  app or the car's Bluetooth buttons — or shuffle moving to its next pick) → if that song fails,
+  the app automatically tries the next one in the current queue, and keeps going until something
+  plays (with a safety limit so it can't loop forever if, say, you've lost signal entirely).
+- **Searching** narrows the on-screen list; tapping a song from a filtered list makes *that
+  filtered list* the active queue, so any of the auto-skip behavior above stays within your
+  search results instead of jumping back out to the full catalog.
+
 ## Notes / limitations
 - This app is for **your personal use only** — it streams directly from chimatamusic.us using
   the same lookup mechanism their own mobile player page uses. It does not host, cache, or
