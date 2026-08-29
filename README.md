@@ -53,6 +53,14 @@ debugging on the phone, plug it in via USB, and hit the green ▶ Run button ins
 4. Drive off — your car stereo's next/previous/play/pause buttons control this app as long as
    it's the last app that was playing audio over the Bluetooth connection.
 
+## Hero/actor data
+Parsed from the solo-song and duet-song listing pages you saved per actor (NTR, ANR, Sobhan
+Babu, Krishna) - each page's table already lists song, movie, music director, lyricist, and
+year together, so hero tagging came straight from that. 2,943 of the catalog's 7,566 songs are
+currently tagged with a hero (duets that listed both stars are tagged with both, comma-separated,
+e.g. "Krishna, NTR"). Every other song - anyone not among these 4 actors yet - is tagged `"NA"`.
+Save and send over more actors' solo/duet pages the same way any time you want wider coverage.
+
 ## Lyricist data
 Parsed from a second view of the site's catalog (`?page=lyricist`), which groups songs by
 lyricist instead of by movie. 7,538 of 7,566 songs matched directly to a lyricist; the rest

@@ -8,7 +8,8 @@ data class Song(
     val title: String,
     val movie: String,
     val musicDirector: String,
-    val lyricist: String
+    val lyricist: String,
+    val heroes: String
 )
 
 data class Movie(
@@ -42,7 +43,8 @@ object Catalog {
                         title = s.getString("title"),
                         movie = movieName,
                         musicDirector = m.optString("musicDirector", ""),
-                        lyricist = s.optString("lyricist", "NA")
+                        lyricist = s.optString("lyricist", "NA"),
+                        heroes = s.optString("heroes", "NA")
                     )
                 )
             }
