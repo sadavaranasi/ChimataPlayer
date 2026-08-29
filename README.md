@@ -53,6 +53,16 @@ debugging on the phone, plug it in via USB, and hit the green ▶ Run button ins
 4. Drive off — your car stereo's next/previous/play/pause buttons control this app as long as
    it's the last app that was playing audio over the Bluetooth connection.
 
+## Combining search terms with and/or
+Type "and" or "or" (with spaces around them) between terms to combine fields, e.g.:
+- `ntr and veturi and ilaiyaraja` - only songs matching **all three** (hero, lyricist, music
+  director together).
+- `chiranjeevi or balakrishna` - songs matching **either** hero.
+- You can mix both: `ntr and veturi or anr and veturi` groups around "or", so this means
+  "(ntr and veturi) or (anr and veturi)".
+A plain query with neither word works exactly as before - one literal phrase checked against
+every field (title, movie, hero, music director, lyricist).
+
 ## Hero/actor data
 Parsed from the solo-song and duet-song listing pages you saved per actor (NTR, ANR, Sobhan
 Babu, Krishna) - each page's table already lists song, movie, music director, lyricist, and

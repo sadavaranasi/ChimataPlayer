@@ -14,20 +14,37 @@ class SongListAdapter(
     var shown: List<Song> = allSongs
         private set
 
+    /**
+     * Supports "and"/"or" as query connectives, e.g. "ntr and veturi and ilaiyaraja" or
+     * "chiranjeevi or balakrishna". "and" narrows (every term must match, on any field);
+     * "or" widens (any group matching is enough). A plain query with neither keyword behaves
+     * exactly as before - one literal substring checked against every field.
+     */
     fun filter(query: String) {
-        shown = if (query.isBlank()) {
+        val trimmed = query.trim()
+        shown = if (trimmed.isBlank()) {
             allSongs
         } else {
-            val q = query.trim().lowercase()
-            allSongs.filter {
-                it.title.lowercase().contains(q) ||
-                    it.movie.lowercase().contains(q) ||
-                    it.musicDirector.lowercase().contains(q) ||
-                    it.lyricist.lowercase().contains(q) ||
-                    it.heroes.lowercase().contains(q)
+            val orGroups = trimmed.split(Regex("(?i)\\s+or\\s+"))
+            allSongs.filter { song ->
+                orGroups.any { group ->
+                    val terms = group.split(Regex("(?i)\\s+and\\s+"))
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() }
+                    terms.isNotEmpty() && terms.all { term -> songMatchesTerm(song, term) }
+                }
             }
         }
         notifyDataSetChanged()
+    }
+
+    private fun songMatchesTerm(song: Song, term: String): Boolean {
+        val t = term.lowercase()
+        return song.title.lowercase().contains(t) ||
+            song.movie.lowercase().contains(t) ||
+            song.musicDirector.lowercase().contains(t) ||
+            song.lyricist.lowercase().contains(t) ||
+            song.heroes.lowercase().contains(t)
     }
 
     inner class VH(val binding: ItemSongBinding) : RecyclerView.ViewHolder(binding.root)
