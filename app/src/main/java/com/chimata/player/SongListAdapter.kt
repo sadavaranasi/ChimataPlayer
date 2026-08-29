@@ -58,9 +58,8 @@ class SongListAdapter(
         val song = shown[position]
         holder.binding.songTitle.text = song.title
         holder.binding.songMovie.text = song.movie
-        holder.binding.tagHero.text = "Hero: ${song.heroes}"
-        holder.binding.tagMusic.text = "Music: ${song.musicDirector}"
-        holder.binding.tagLyricist.text = "Lyrics: ${song.lyricist}"
+        holder.binding.songDirector.text =
+            "Hero: ${song.heroes}  |  Music: ${song.musicDirector}  |  Lyrics: ${song.lyricist}"
         holder.binding.root.setOnClickListener { onClick(song) }
     }
 

@@ -1,140 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/cream">
+    android:background="@color/cream"
+    android:padding="12dp">
 
-    <!-- Now Playing hero panel: fixed dark background + fixed light text, so contrast never
-         depends on the phone's system light/dark mode setting. -->
-    <com.google.android.material.card.MaterialCardView
+    <EditText
+        android:id="@+id/searchBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="14dp"
-        app:cardBackgroundColor="@color/ink"
-        app:cardCornerRadius="18dp"
-        app:cardElevation="6dp">
+        android:hint="@string/search_hint"
+        android:inputType="text"
+        android:textColor="@color/charcoal"
+        android:textColorHint="@color/mauve"
+        android:autofillHints="" />
+
+    <!-- Now Playing panel: fixed dark background + fixed light text, so contrast can never
+         depend on the phone's system light/dark mode setting. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical"
+        android:background="@color/ink"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/now_playing_eyebrow"
+            android:textColor="@color/marquee_gold"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/nowPlayingTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="@string/nothing_playing"
+            android:textColor="@color/marquee_gold"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/nowPlayingMovie"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/cream"
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="18dp">
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:orientation="horizontal">
 
-            <TextView
+            <Button
+                android:id="@+id/btnPrev"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/now_playing_eyebrow"
-                android:textColor="@color/marquee_gold"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.18" />
+                android:text="@string/previous" />
 
-            <TextView
-                android:id="@+id/nowPlayingTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/nothing_playing"
-                android:textColor="@color/marquee_gold"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:maxLines="2"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/nowPlayingMovie"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="@color/cream"
-                android:textSize="14sp"
-                android:alpha="0.85"
-                android:maxLines="1"
-                android:ellipsize="end" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnPrev"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/previous"
-                    android:textColor="@color/cream"
-                    app:strokeColor="@color/marquee_gold"
-                    app:cornerRadius="24dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnPlayPause"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:text="@string/play"
-                    android:textColor="@color/ink"
-                    app:backgroundTint="@color/marquee_gold"
-                    app:cornerRadius="24dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnNext"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/next"
-                    android:textColor="@color/cream"
-                    app:strokeColor="@color/marquee_gold"
-                    app:cornerRadius="24dp" />
-            </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/shuffleToggle"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+            <Button
+                android:id="@+id/btnPlayPause"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_gravity="center_horizontal"
-                android:checkable="true"
-                android:text="@string/sequential_on"
-                android:textColor="@color/marquee_gold" />
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:text="@string/play" />
+
+            <Button
+                android:id="@+id/btnNext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/next" />
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="14dp"
-        android:layout_marginBottom="6dp"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        app:boxCornerRadiusTopStart="14dp"
-        app:boxCornerRadiusTopEnd="14dp"
-        app:boxCornerRadiusBottomStart="14dp"
-        app:boxCornerRadiusBottomEnd="14dp"
-        app:boxStrokeColor="@color/ink"
-        app:hintTextColor="@color/mauve">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/searchBox"
-            android:layout_width="match_parent"
+        <ToggleButton
+            android:id="@+id/shuffleToggle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="@string/search_hint"
-            android:inputType="text"
-            android:textColor="@color/charcoal"
-            android:autofillHints="" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_marginTop="8dp"
+            android:layout_gravity="center_horizontal"
+            android:textOn="@string/shuffle_on"
+            android:textOff="@string/sequential_on"
+            android:text="@string/sequential_on" />
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/songList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingHorizontal="10dp"
-        android:clipToPadding="false" />
+        android:layout_marginTop="10dp" />
 
 </LinearLayout>

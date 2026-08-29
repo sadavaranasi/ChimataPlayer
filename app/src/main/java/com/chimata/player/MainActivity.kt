@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        binding.shuffleToggle.addOnCheckedChangeListener { _, isChecked ->
+        binding.shuffleToggle.setOnCheckedChangeListener { _, isChecked ->
             service?.setShuffle(isChecked)
             binding.shuffleToggle.text =
                 if (isChecked) getString(R.string.shuffle_on) else getString(R.string.sequential_on)
