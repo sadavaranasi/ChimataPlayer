@@ -1,7 +1,12 @@
 package com.chimata.player
 
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
@@ -50,6 +55,7 @@ class PlaybackService : MediaSessionService() {
     // it. Governs whether a playback error is allowed to auto-skip to the next song or not.
     private var expectingManualSeek = false
     private var lastPlayWasManual = false
+    private var networkWaitCallback: ConnectivityManager.NetworkCallback? = null
     private var consecutiveAutoSkips = 0
 
     override fun onCreate() {
@@ -104,6 +110,7 @@ class PlaybackService : MediaSessionService() {
                 Log.d(TAG, "Playback state -> $name")
                 if (playbackState == Player.STATE_READY) {
                     consecutiveAutoSkips = 0
+                    clearNetworkWait()
                     // The manual flag should only protect a song's very first attempt to start
                     // (i.e. "this exact tap failed outright, stop"). Once it has actually reached
                     // READY - meaning the direct pick already succeeded once - any later hiccup
@@ -148,6 +155,14 @@ class PlaybackService : MediaSessionService() {
                 }
                 Log.e(TAG, "Playback error [${error.errorCodeName}]: ${chain.ifBlank { error.message ?: "unknown" }}")
 
+                if (!isNetworkConnected()) {
+                    // Every song would fail the same way right now - skipping through the queue
+                    // is pointless. Wait for connectivity to actually come back, then retry this
+                    // exact song, whether it was a manual pick or mid-sequence.
+                    waitForNetworkThenRetryCurrentSong()
+                    return
+                }
+
                 if (lastPlayWasManual) {
                     Log.d(TAG, "Error was on a manually-selected song - stopping, not auto-skipping.")
                     return
@@ -188,6 +203,50 @@ class PlaybackService : MediaSessionService() {
             )
             .build()
 
+    private fun isNetworkConnected(): Boolean {
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = cm.activeNetwork ?: return false
+        val caps = cm.getNetworkCapabilities(network) ?: return false
+        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+    private fun waitForNetworkThenRetryCurrentSong() {
+        if (networkWaitCallback != null) {
+            // Already waiting on a previous failure - don't stack multiple callbacks.
+            return
+        }
+        Log.w(TAG, "No signal - waiting for connectivity to return before retrying.")
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val request = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .build()
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                mainHandler.post {
+                    Log.d(TAG, "Signal restored - retrying current song.")
+                    cm.unregisterNetworkCallback(this)
+                    networkWaitCallback = null
+                    player.prepare()
+                    player.playWhenReady = true
+                }
+            }
+        }
+        networkWaitCallback = callback
+        cm.registerNetworkCallback(request, callback)
+    }
+
+    private fun clearNetworkWait() {
+        networkWaitCallback?.let { callback ->
+            val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            try {
+                cm.unregisterNetworkCallback(callback)
+            } catch (_: Exception) {
+                // Already unregistered - fine.
+            }
+        }
+        networkWaitCallback = null
+    }
+
     private fun attemptAutoSkip() {
         consecutiveAutoSkips++
         val queueSize = player.mediaItemCount
@@ -219,6 +278,7 @@ class PlaybackService : MediaSessionService() {
     fun playManualSelection(orderedIds: List<Int>, startId: Int) {
         val items = orderedIds.mapNotNull { id -> songById[id]?.let { toMediaItem(it) } }
         val startIndex = orderedIds.indexOf(startId).coerceAtLeast(0)
+        clearNetworkWait()
         expectingManualSeek = true
         consecutiveAutoSkips = 0
         player.setMediaItems(items, startIndex, 0L)
@@ -231,6 +291,7 @@ class PlaybackService : MediaSessionService() {
     }
 
     override fun onDestroy() {
+        clearNetworkWait()
         mainHandler.removeCallbacksAndMessages(null)
         mediaSession.release()
         player.release()

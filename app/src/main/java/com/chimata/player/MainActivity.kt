@@ -83,7 +83,19 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnPlayPause.setOnClickListener {
-            service?.player?.let { p -> if (p.isPlaying) p.pause() else p.play() }
+            service?.player?.let { p ->
+                if (p.isPlaying) {
+                    p.pause()
+                } else {
+                    // If playback previously errored out or fully stopped, the player can end
+                    // up idle - just calling play() on an idle player does nothing audible,
+                    // it needs to be re-prepared first.
+                    if (p.playbackState == Player.STATE_IDLE) {
+                        p.prepare()
+                    }
+                    p.play()
+                }
+            }
         }
         // Explicit next/prev presses are queue navigation, not a "direct pick" - if the
         // resulting song fails, the service's own error handling will auto-skip onward.
